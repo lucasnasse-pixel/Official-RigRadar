@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RigRadar — Buy Smarter. Play Better.</title>
+<meta name="description" content="Honest gaming-gear rankings built from expert reviews and thousands of verified buyers, cross-referenced into one clear signal. Top 10 mice, keyboards and more.">
+<meta name="theme-color" content="#0a0711">
+<meta property="og:title" content="RigRadar — Buy Smarter. Play Better.">
+<meta property="og:description" content="Honest gaming-gear rankings, cross-referenced from experts and real buyers. No hype.">
+<meta property="og:type" content="website">
+<style>*{margin:0}html,body{background:#0a0711}</style>
+</head>
+<body>
+<style>
+  /* ============================================================
+     RigRadar — Radar Console
+     Single-file review platform. Tokens → components → layout.
+     ============================================================ */
+
+  :root{
+    /* dark = default (a radar console is intrinsically dark) */
+    --bg:#0a0711; --bg-2:#0f0b1c;
+    --surface:#15102a; --surface-2:#1c1638; --surface-3:#241b45;
+    --line:rgba(168,120,247,.14); --line-strong:rgba(168,120,247,.30);
+    --text:#ece8fb; --muted:#a79cc9; --faint:#6f6690;
+    --violet:#a855f7; --violet-br:#c084fc; --violet-deep:#7c3aed;
+    --phosphor:#35f0a5; --phosphor-soft:rgba(53,240,165,.16);
+    --amber:#f5b544;
+    --track:rgba(168,120,247,.18);
+    --shadow:0 24px 60px -24px rgba(0,0,0,.7);
+    --glow:0 0 0 1px var(--line-strong), 0 18px 50px -20px rgba(124,58,237,.55);
+    --radius:16px; --radius-sm:11px;
+    --maxw:1200px;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,"Cascadia Code",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Roboto,Helvetica,Arial,sans-serif;
+    --scan:.045;
+    color-scheme:dark;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f3f1fb; --bg-2:#eae7f6;
+      --surface:#ffffff; --surface-2:#f5f2fd; --surface-3:#ece7fb;
+      --line:rgba(124,58,237,.16); --line-strong:rgba(124,58,237,.30);
+      --text:#1b1435; --muted:#5c5382; --faint:#8b83a8;
+      --violet:#7c3aed; --violet-br:#9333ea; --violet-deep:#6d28d9;
+      --phosphor:#0e9d63; --phosphor-soft:rgba(14,157,99,.13);
+      --amber:#b57614;
+      --track:rgba(124,58,237,.16);
+      --shadow:0 24px 60px -30px rgba(80,40,160,.30);
+      --glow:0 0 0 1px var(--line-strong), 0 16px 40px -22px rgba(124,58,237,.35);
+      --scan:.02;
+      color-scheme:light;
+    }
+  }
+  /* explicit toggle wins in both directions */
+  :root[data-theme="dark"]{
+    --bg:#0a0711; --bg-2:#0f0b1c; --surface:#15102a; --surface-2:#1c1638; --surface-3:#241b45;
+    --line:rgba(168,120,247,.14); --line-strong:rgba(168,120,247,.30);
+    --text:#ece8fb; --muted:#a79cc9; --faint:#6f6690;
+    --violet:#a855f7; --violet-br:#c084fc; --violet-deep:#7c3aed;
+    --phosphor:#35f0a5; --phosphor-soft:rgba(53,240,165,.16); --amber:#f5b544;
+    --track:rgba(168,120,247,.18); --shadow:0 24px 60px -24px rgba(0,0,0,.7);
+    --glow:0 0 0 1px var(--line-strong), 0 18px 50px -20px rgba(124,58,237,.55); --scan:.045; color-scheme:dark;
+  }
+  :root[data-theme="light"]{
+    --bg:#f3f1fb; --bg-2:#eae7f6; --surface:#ffffff; --surface-2:#f5f2fd; --surface-3:#ece7fb;
+    --line:rgba(124,58,237,.16); --line-strong:rgba(124,58,237,.30);
+    --text:#1b1435; --muted:#5c5382; --faint:#8b83a8;
+    --violet:#7c3aed; --violet-br:#9333ea; --violet-deep:#6d28d9;
+    --phosphor:#0e9d63; --phosphor-soft:rgba(14,157,99,.13); --amber:#b57614;
+    --track:rgba(124,58,237,.16); --shadow:0 24px 60px -30px rgba(80,40,160,.30);
+    --glow:0 0 0 1px var(--line-strong), 0 16px 40px -22px rgba(124,58,237,.35); --scan:.02; color-scheme:light;
+  }
+
+  @property --v{ syntax:'<number>'; inherits:false; initial-value:0; }
+
+  *{ box-sizing:border-box; }
+  html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; }
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:16px; line-height:1.6;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  /* ambient field + scanlines */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(900px 600px at 82% -8%, rgba(124,58,237,.20), transparent 60%),
+      radial-gradient(700px 520px at 6% 4%, rgba(53,240,165,.07), transparent 55%),
+      radial-gradient(1000px 800px at 50% 120%, rgba(124,58,237,.10), transparent 60%);
+  }
+  body::after{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:repeating-linear-gradient(to bottom, rgba(255,255,255,var(--scan)) 0 1px, transparent 1px 3px);
+    mix-blend-mode:overlay; opacity:.6;
+  }
+  #app{ position:relative; z-index:1; }
+
+  a{ color:inherit; text-decoration:none; }
+  img{ max-width:100%; display:block; }
+  button{ font-family:inherit; }
+  ::selection{ background:var(--violet); color:#fff; }
+  :focus-visible{ outline:2px solid var(--phosphor); outline-offset:3px; border-radius:6px; }
+
+  .wrap{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 24px; }
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--violet-br); display:inline-flex; align-items:center; gap:9px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:1px; background:var(--violet); opacity:.7; }
+  .eyebrow.plain::before{ display:none; }
+  h1,h2,h3{ text-wrap:balance; margin:0; line-height:1.05; letter-spacing:-.02em; font-weight:800; }
+  .mono{ font-family:var(--mono); }
+  .tnum{ font-variant-numeric:tabular-nums; }
+
+  /* ---------- header ---------- */
+  header.nav{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+    background:color-mix(in srgb, var(--bg) 78%, transparent);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-in{ display:flex; align-items:center; gap:20px; height:66px; }
+  .brand{ display:flex; align-items:center; gap:11px; margin-right:auto; }
+  .brand .mark{ width:34px; height:34px; flex:0 0 auto; filter:drop-shadow(0 0 10px rgba(53,240,165,.35)); }
+  .brand .wordmark{ font-weight:800; font-size:19px; letter-spacing:-.01em; }
+  .brand .wordmark b{ color:var(--violet-br); font-weight:800; }
+  .brand small{ display:block; font-family:var(--mono); font-size:9.5px; letter-spacing:.24em; color:var(--faint); text-transform:uppercase; margin-top:-2px; }
+  nav.links{ display:flex; align-items:center; gap:4px; }
+  nav.links a{
+    font-size:14.5px; font-weight:600; color:var(--muted); padding:9px 14px; border-radius:999px;
+    transition:color .18s, background .18s;
+  }
+  nav.links a:hover{ color:var(--text); background:var(--surface-2); }
+  nav.links a.active{ color:var(--text); background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--line-strong); }
+  .nav-tools{ display:flex; align-items:center; gap:8px; }
+  .icon-btn{
+    display:inline-grid; place-items:center; width:40px; height:40px; border-radius:11px; cursor:pointer;
+    background:var(--surface-2); border:1px solid var(--line); color:var(--muted);
+    transition:color .18s, border-color .18s, transform .12s;
+  }
+  .icon-btn:hover{ color:var(--text); border-color:var(--line-strong); }
+  .icon-btn:active{ transform:scale(.94); }
+  .cmp-btn{
+    position:relative; display:inline-flex; align-items:center; gap:8px; height:40px; padding:0 15px;
+    border-radius:11px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted);
+    font-family:var(--mono); font-size:12.5px; letter-spacing:.04em; cursor:pointer; font-weight:600;
+    transition:color .18s, border-color .18s;
+  }
+  .cmp-btn:hover{ color:var(--text); border-color:var(--line-strong); }
+  .cmp-btn .n{
+    min-width:20px; height:20px; padding:0 5px; border-radius:999px; display:grid; place-items:center;
+    background:var(--phosphor); color:#04140c; font-weight:700; font-size:11.5px;
+  }
+  :root[data-theme="dark"] .cmp-btn .n, .cmp-btn .n{ color:#04140c; }
+  .hamb{ display:none; }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:9px;
+    padding:13px 22px; border-radius:12px; font-weight:700; font-size:15px; cursor:pointer;
+    border:1px solid transparent; transition:transform .12s, box-shadow .2s, background .2s, border-color .2s; white-space:nowrap;
+  }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{ background:linear-gradient(180deg, var(--violet-br), var(--violet-deep)); color:#fff; box-shadow:0 10px 30px -10px rgba(124,58,237,.75); }
+  .btn-primary:hover{ box-shadow:0 14px 38px -10px rgba(124,58,237,.9); }
+  .btn-ghost{ background:var(--surface-2); color:var(--text); border-color:var(--line-strong); }
+  .btn-ghost:hover{ border-color:var(--violet); }
+  .btn-block{ width:100%; }
+  .btn-sm{ padding:9px 15px; font-size:13.5px; border-radius:10px; }
+
+  /* ---------- gauge ---------- */
+  .gauge{
+    --v:0; position:relative; border-radius:50%; flex:0 0 auto; display:grid; place-items:center;
+    background:conic-gradient(var(--gc,var(--phosphor)) calc(var(--v)*3.6deg), var(--track) 0deg);
+    transition:--v 1.1s cubic-bezier(.2,.7,.2,1);
+  }
+  .gauge::before{ content:""; position:absolute; inset:4px; border-radius:50%; background:var(--surface); }
+  :root[data-theme="light"] .gauge::before{ background:#fff; }
+  .gauge .g-num{ position:relative; z-index:1; font-family:var(--mono); font-weight:700; letter-spacing:-.02em; }
+  .gauge.sm{ width:52px; height:52px; } .gauge.sm .g-num{ font-size:15px; }
+  .gauge.lg{ width:132px; height:132px; } .gauge.lg::before{ inset:8px; }
+  .gauge.lg .g-num{ font-size:38px; }
+  .gauge.lg .g-sub{ position:relative; z-index:1; font-family:var(--mono); font-size:9.5px; letter-spacing:.16em; color:var(--faint); text-transform:uppercase; margin-top:1px; }
+
+  /* ---------- tag / pill ---------- */
+  .tag{ font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--violet-br);
+        background:var(--surface-3); border:1px solid var(--line); padding:4px 9px; border-radius:7px; white-space:nowrap; }
+  .pill{ font-family:var(--mono); font-size:11px; letter-spacing:.1em; text-transform:uppercase; padding:5px 11px; border-radius:999px; font-weight:600; }
+  .pill.live{ color:var(--phosphor); background:var(--phosphor-soft); border:1px solid color-mix(in srgb,var(--phosphor) 40%, transparent); }
+  .pill.soon{ color:var(--amber); background:color-mix(in srgb,var(--amber) 13%, transparent); border:1px solid color-mix(in srgb,var(--amber) 35%, transparent); }
+  .price{ font-family:var(--mono); font-weight:700; color:var(--phosphor); letter-spacing:-.01em; }
+
+  /* ---------- reveal ---------- */
+  .rv{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+  .rv.in{ opacity:1; transform:none; }
+
+  /* ============ HERO ============ */
+  .hero{ position:relative; padding:64px 0 40px; }
+  .hero-grid{ display:grid; grid-template-columns:1.05fr .95fr; gap:44px; align-items:center; }
+  .hero h1{ font-size:clamp(44px,6.4vw,82px); margin:18px 0 0; }
+  .hero h1 .lo{ display:block; color:var(--text); }
+  .hero h1 .hi{ display:block; background:linear-gradient(100deg,var(--violet-br),var(--phosphor)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero p.lead{ font-size:clamp(16px,1.7vw,19px); color:var(--muted); max-width:46ch; margin:22px 0 0; }
+  .hero-cta{ display:flex; gap:12px; margin-top:30px; flex-wrap:wrap; }
+  .hero-strip{ display:flex; gap:26px; margin-top:34px; padding-top:24px; border-top:1px solid var(--line); flex-wrap:wrap; }
+  .hero-strip .s .k{ font-family:var(--mono); font-size:22px; font-weight:700; color:var(--text); letter-spacing:-.02em; }
+  .hero-strip .s .k b{ color:var(--phosphor); font-weight:700; }
+  .hero-strip .s .l{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); margin-top:2px; }
+
+  .radar-shell{ position:relative; aspect-ratio:1/1; border-radius:24px; overflow:hidden;
+    background:radial-gradient(circle at 50% 50%, rgba(53,240,165,.06), transparent 62%), var(--surface); border:1px solid var(--line); box-shadow:var(--shadow); }
+  .radar-shell canvas{ position:absolute; inset:0; width:100%; height:100%; }
+  .radar-badge{ position:absolute; left:16px; top:14px; z-index:2; font-family:var(--mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase; color:var(--phosphor); display:flex; align-items:center; gap:7px; }
+  .radar-badge .dot{ width:7px; height:7px; border-radius:50%; background:var(--phosphor); box-shadow:0 0 10px var(--phosphor); animation:blink 1.8s infinite; }
+  @keyframes blink{ 0%,100%{opacity:1} 50%{opacity:.25} }
+  .radar-readout{ position:absolute; right:14px; bottom:13px; z-index:2; font-family:var(--mono); font-size:10px; letter-spacing:.1em; color:var(--faint); text-align:right; text-transform:uppercase; }
+
+  /* ============ generic section ============ */
+  section.band{ padding:56px 0; position:relative; }
+  .sec-head{ display:flex; align-items:flex-end; justify-content:space-between; gap:20px; margin-bottom:30px; flex-wrap:wrap; }
+  .sec-head h2{ font-size:clamp(27px,3.4vw,40px); margin-top:12px; }
+  .sec-head p{ color:var(--muted); margin:8px 0 0; max-width:52ch; }
+  .link-arrow{ font-family:var(--mono); font-size:13px; font-weight:600; color:var(--violet-br); letter-spacing:.03em; display:inline-flex; align-items:center; gap:7px; }
+  .link-arrow:hover{ color:var(--phosphor); }
+
+  /* pillars */
+  .pillars{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .pillar{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px 24px; position:relative; overflow:hidden; transition:border-color .25s, transform .25s; }
+  .pillar:hover{ border-color:var(--line-strong); transform:translateY(-3px); }
+  .pillar .pn{ font-family:var(--mono); font-size:11px; color:var(--faint); letter-spacing:.18em; }
+  .pillar .pic{ width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:var(--surface-3); border:1px solid var(--line); color:var(--violet-br); margin:14px 0 16px; }
+  .pillar h3{ font-size:19px; } .pillar p{ color:var(--muted); font-size:14.5px; margin:9px 0 0; }
+  .pillar::after{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(var(--violet),var(--phosphor)); opacity:0; transition:opacity .25s; }
+  .pillar:hover::after{ opacity:1; }
+
+  /* featured picks */
+  .feat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .feat{ display:flex; gap:18px; align-items:center; background:linear-gradient(180deg,var(--surface-2),var(--surface)); border:1px solid var(--line); border-radius:var(--radius); padding:22px; transition:border-color .25s, transform .25s; cursor:pointer; }
+  .feat:hover{ border-color:var(--violet); transform:translateY(-3px); }
+  .feat .fmeta .top{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--violet-br); display:flex; align-items:center; gap:8px; }
+  .feat .fmeta h3{ font-size:20px; margin:8px 0 6px; }
+  .feat .fmeta .d{ color:var(--muted); font-size:14px; } .feat .fmeta .p{ margin-top:12px; display:flex; align-items:center; gap:12px; }
+
+  /* method timeline */
+  .method{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; counter-reset:m; }
+  .step{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px 20px; position:relative; }
+  .step .num{ font-family:var(--mono); font-size:13px; color:var(--phosphor); letter-spacing:.1em; }
+  .step h3{ font-size:17px; margin:12px 0 8px; } .step p{ color:var(--muted); font-size:14px; margin:0; }
+  .step::before{ content:""; position:absolute; right:-10px; top:38px; width:20px; height:1px; background:var(--line-strong); }
+  .step:last-child::before{ display:none; }
+
+  /* CTA card */
+  .cta-card{ position:relative; overflow:hidden; border-radius:22px; border:1px solid var(--line-strong);
+    background:radial-gradient(700px 300px at 15% 0%, rgba(124,58,237,.35), transparent 60%), var(--surface);
+    padding:48px; text-align:center; box-shadow:var(--shadow); }
+  .cta-card h2{ font-size:clamp(26px,3.4vw,38px); } .cta-card p{ color:var(--muted); max-width:50ch; margin:14px auto 0; }
+
+  /* waitlist form */
+  .wl{ display:flex; gap:10px; max-width:440px; margin:26px auto 0; flex-wrap:wrap; }
+  .wl input{ flex:1 1 220px; min-width:0; height:50px; padding:0 16px; border-radius:12px; background:var(--bg-2);
+    border:1px solid var(--line-strong); color:var(--text); font-size:15px; font-family:var(--sans); }
+  .wl input::placeholder{ color:var(--faint); }
+  .wl input:focus{ outline:none; border-color:var(--violet); }
+  .wl-note{ font-family:var(--mono); font-size:11.5px; color:var(--faint); margin-top:14px; letter-spacing:.03em; }
+  .wl-ok{ color:var(--phosphor); font-family:var(--mono); font-size:14px; margin-top:22px; display:flex; align-items:center; justify-content:center; gap:9px; }
+
+  /* ============ reviews grid ============ */
+  .page-head{ padding:52px 0 26px; }
+  .page-head h1{ font-size:clamp(34px,5vw,58px); margin-top:14px; }
+  .page-head p{ color:var(--muted); max-width:60ch; margin:16px 0 0; }
+  .cat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .cat-card{ position:relative; overflow:hidden; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:28px; cursor:pointer; transition:border-color .25s, transform .25s; display:flex; flex-direction:column; min-height:190px; }
+  .cat-card.live:hover{ border-color:var(--violet); transform:translateY(-4px); }
+  .cat-card.soon{ cursor:default; }
+  .cat-card .cic{ width:52px; height:52px; border-radius:13px; display:grid; place-items:center; background:var(--surface-3); border:1px solid var(--line); color:var(--violet-br); margin-bottom:auto; }
+  .cat-card h3{ font-size:22px; margin:20px 0 8px; } .cat-card .cd{ color:var(--muted); font-size:14px; }
+  .cat-card .cfoot{ margin-top:16px; display:flex; align-items:center; gap:10px; }
+  .cat-grid.more{ grid-template-columns:repeat(4,1fr); }
+  .cat-grid.more .cat-card{ min-height:0; padding:22px; align-items:flex-start; }
+  .cat-grid.more .cat-card .cic{ width:44px; height:44px; margin-bottom:14px; }
+  .cat-grid.more .cat-card h3{ font-size:17px; margin:0 0 12px; }
+
+  /* controls */
+  .controls{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 26px; padding:14px; background:var(--surface); border:1px solid var(--line); border-radius:14px; }
+  .search{ position:relative; flex:1 1 260px; }
+  .search input{ width:100%; height:44px; padding:0 14px 0 42px; border-radius:10px; background:var(--bg-2); border:1px solid var(--line); color:var(--text); font-size:14.5px; font-family:var(--sans); }
+  .search input:focus{ outline:none; border-color:var(--violet); }
+  .search svg{ position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--faint); }
+  .seg{ display:flex; gap:4px; background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:4px; }
+  .seg button{ border:none; background:transparent; color:var(--muted); font-family:var(--mono); font-size:12.5px; font-weight:600; letter-spacing:.03em; padding:8px 13px; border-radius:7px; cursor:pointer; transition:color .15s, background .15s; }
+  .seg button.on{ background:var(--surface-3); color:var(--text); }
+  .seg button:hover{ color:var(--text); }
+
+  /* ranked list */
+  .rank-list{ display:flex; flex-direction:column; gap:12px; }
+  .contact{ display:grid; grid-template-columns:56px 52px 1fr auto; gap:20px; align-items:center;
+    background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px 22px;
+    position:relative; overflow:hidden; transition:border-color .22s, transform .22s, background .22s; }
+  .contact:hover{ border-color:var(--violet); transform:translateX(3px); }
+  .contact::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:linear-gradient(var(--violet),var(--phosphor)); opacity:0; transition:opacity .22s; }
+  .contact:hover::before{ opacity:1; }
+  .rk{ font-family:var(--mono); font-weight:700; font-size:34px; letter-spacing:-.04em; color:var(--faint); text-align:center; }
+  .contact:nth-child(1) .rk, .rk.top{ color:var(--violet-br); }
+  .c-body{ min-width:0; cursor:pointer; }
+  .c-body .cname{ font-size:18px; font-weight:700; letter-spacing:-.01em; }
+  .c-body .ctags{ display:flex; gap:7px; margin:7px 0 8px; flex-wrap:wrap; }
+  .c-body .cdesc{ color:var(--muted); font-size:14px; margin:0; }
+  .c-body .cbest{ font-family:var(--mono); font-size:11.5px; color:var(--faint); margin-top:8px; letter-spacing:.02em; }
+  .c-body .cbest b{ color:var(--muted); font-weight:600; }
+  .c-right{ display:flex; flex-direction:column; align-items:flex-end; gap:12px; }
+  .c-right .price{ font-size:17px; }
+  .c-actions{ display:flex; gap:7px; }
+  .mini{ display:inline-grid; place-items:center; width:34px; height:34px; border-radius:9px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); cursor:pointer; transition:color .15s, border-color .15s, background .15s; }
+  .mini:hover{ color:var(--text); border-color:var(--line-strong); }
+  .mini.on{ color:var(--phosphor); border-color:color-mix(in srgb,var(--phosphor) 45%, transparent); background:var(--phosphor-soft); }
+
+  /* ============ product page ============ */
+  .prod-grid{ display:grid; grid-template-columns:1.55fr .95fr; gap:34px; align-items:start; padding-top:8px; }
+  .back{ font-family:var(--mono); font-size:12.5px; color:var(--muted); display:inline-flex; align-items:center; gap:8px; margin:36px 0 22px; letter-spacing:.04em; }
+  .back:hover{ color:var(--phosphor); }
+  .prod-head h1{ font-size:clamp(30px,4vw,48px); margin-top:12px; }
+  .prod-price{ display:flex; align-items:baseline; gap:14px; margin:18px 0 6px; }
+  .prod-price .price{ font-size:30px; } .prod-price .typ{ font-family:var(--mono); font-size:13px; color:var(--faint); }
+  .prod-best{ font-family:var(--mono); font-size:13px; color:var(--muted); }
+  .prod-best b{ color:var(--phosphor); font-weight:600; }
+  .verdict{ position:relative; background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--violet); border-radius:14px; padding:24px 26px; margin-top:26px; }
+  .verdict .eyebrow{ margin-bottom:10px; } .verdict p{ margin:0; color:var(--text); font-size:16px; line-height:1.65; }
+  .pc-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px; }
+  .pc{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px 22px; }
+  .pc h4{ font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; margin:0 0 14px; }
+  .pc.pros h4{ color:var(--phosphor); } .pc.cons h4{ color:var(--amber); }
+  .pc ul{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:11px; }
+  .pc li{ font-size:14.5px; color:var(--muted); display:flex; gap:10px; align-items:flex-start; }
+  .pc li::before{ content:""; width:15px; height:15px; margin-top:3px; flex:0 0 auto; background-size:contain; background-repeat:no-repeat; }
+  .pc.pros li::before{ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2335f0a5' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>"); }
+  .pc.cons li::before{ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f5b544' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='6' x2='6' y2='18'/><line x1='6' y1='6' x2='18' y2='18'/></svg>"); }
+  h2.block-t{ font-size:22px; margin:36px 0 18px; display:flex; align-items:center; gap:12px; }
+  h2.block-t::after{ content:""; height:1px; flex:1; background:var(--line); }
+  .spec-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .spec{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:15px 17px; }
+  .spec .sk{ font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+  .spec .sv{ font-weight:700; font-size:15px; margin-top:6px; }
+
+  /* sticky score panel */
+  .score-panel{ position:sticky; top:86px; background:var(--surface); border:1px solid var(--line); border-radius:18px; padding:26px; box-shadow:var(--shadow); }
+  .score-panel .sp-top{ display:flex; align-items:center; gap:18px; }
+  .score-panel .sp-lab{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+  .score-panel .sp-rank{ font-size:20px; font-weight:800; margin-top:3px; }
+  .bars{ margin:22px 0 4px; display:flex; flex-direction:column; gap:13px; }
+  .bar .bl{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-bottom:6px; letter-spacing:.03em; }
+  .bar .bt{ height:7px; border-radius:999px; background:var(--track); overflow:hidden; }
+  .bar .bf{ height:100%; border-radius:999px; background:linear-gradient(90deg,var(--violet),var(--phosphor)); width:0; transition:width 1s cubic-bezier(.2,.7,.2,1); }
+  .buy-list{ display:flex; flex-direction:column; gap:9px; margin-top:16px; }
+  .buy{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 16px; border-radius:11px;
+    background:var(--surface-2); border:1px solid var(--line); font-weight:600; font-size:14.5px; transition:border-color .18s, transform .12s, background .18s; }
+  .buy:hover{ border-color:var(--violet); transform:translateY(-1px); }
+  .buy .ext{ color:var(--faint); } .buy:hover .ext{ color:var(--violet-br); }
+  .buy-note{ font-family:var(--mono); font-size:10.5px; color:var(--faint); margin-top:14px; line-height:1.6; letter-spacing:.02em; }
+
+  /* ============ compare ============ */
+  .cmp-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:16px; background:var(--surface); }
+  table.cmp{ border-collapse:collapse; width:100%; min-width:640px; }
+  table.cmp th, table.cmp td{ padding:16px 18px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; }
+  table.cmp thead th{ position:relative; background:var(--surface-2); }
+  table.cmp thead .cph{ font-size:16px; font-weight:700; } table.cmp thead .cpt{ font-family:var(--mono); font-size:11px; color:var(--violet-br); text-transform:uppercase; letter-spacing:.08em; margin-top:5px; }
+  table.cmp tbody th{ font-family:var(--mono); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); font-weight:600; width:150px; background:var(--bg-2); }
+  table.cmp .rm{ position:absolute; top:10px; right:10px; width:24px; height:24px; border-radius:7px; border:1px solid var(--line); background:var(--surface); color:var(--faint); cursor:pointer; display:grid; place-items:center; }
+  table.cmp .rm:hover{ color:var(--amber); border-color:var(--amber); }
+  .empty{ text-align:center; padding:70px 20px; color:var(--muted); }
+  .empty svg{ color:var(--faint); margin-bottom:18px; }
+
+  /* about */
+  .about-hero h1{ font-size:clamp(32px,4.6vw,56px); margin-top:14px; }
+  .about-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:40px; }
+  .astat{ background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--violet); border-radius:14px; padding:24px; }
+  .astat .k{ font-family:var(--mono); font-size:26px; font-weight:700; color:var(--violet-br); }
+  .astat .l{ color:var(--muted); font-size:14px; margin-top:6px; }
+  .prose{ max-width:64ch; } .prose p{ color:var(--muted); font-size:16px; }
+  .prose p b{ color:var(--text); }
+
+  /* footer */
+  footer.foot{ border-top:1px solid var(--line); margin-top:40px; padding:44px 0 40px; position:relative; z-index:1; }
+  .foot-in{ display:flex; justify-content:space-between; gap:28px; flex-wrap:wrap; align-items:flex-start; }
+  .foot .brand{ margin-right:0; }
+  .foot-cols{ display:flex; gap:56px; flex-wrap:wrap; }
+  .foot-col h5{ font-family:var(--mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin:0 0 14px; }
+  .foot-col a{ display:block; color:var(--muted); font-size:14px; padding:4px 0; }
+  .foot-col a:hover{ color:var(--text); }
+  .foot-bottom{ margin-top:34px; padding-top:22px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-family:var(--mono); font-size:12px; color:var(--faint); letter-spacing:.03em; }
+
+  .disclaim{ text-align:center; font-family:var(--mono); font-size:11px; color:var(--faint); margin:0 auto; padding:0 24px 8px; max-width:70ch; line-height:1.6; }
+
+  /* ---------- responsive ---------- */
+  @media (max-width:900px){
+    .hero-grid{ grid-template-columns:1fr; gap:30px; } .radar-shell{ max-width:440px; margin:0 auto; width:100%; }
+    .prod-grid{ grid-template-columns:1fr; } .score-panel{ position:static; }
+    .method{ grid-template-columns:1fr 1fr; } .step::before{ display:none; }
+    .cat-grid.more{ grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width:720px){
+    nav.links, .cmp-btn .txt{ display:none; }
+    .hamb{ display:inline-grid; }
+    nav.links.open{ display:flex; position:absolute; top:66px; left:0; right:0; flex-direction:column; gap:2px; padding:14px;
+      background:var(--bg-2); border-bottom:1px solid var(--line-strong); }
+    nav.links.open a{ width:100%; }
+    .pillars, .feat-grid, .cat-grid, .about-stats, .spec-grid, .pc-grid{ grid-template-columns:1fr; }
+    .contact{ grid-template-columns:44px 1fr; gap:14px; row-gap:14px; padding:16px; }
+    .contact .gauge{ grid-row:1; grid-column:2; justify-self:end; }
+    .contact .c-body{ grid-column:1 / -1; } .c-right{ grid-column:1 / -1; flex-direction:row; justify-content:space-between; align-items:center; }
+    .rk{ font-size:26px; }
+    .spec-grid{ grid-template-columns:1fr 1fr; }
+    .wrap{ padding:0 18px; }
+  }
+  @media (max-width:440px){ .method, .cat-grid.more, .spec-grid{ grid-template-columns:1fr; } }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; scroll-behavior:auto !important; }
+    .rv{ opacity:1; transform:none; }
+  }
+</style>
+
+<div id="app"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================ DATA ============================ */
+  const svgLogo = `<svg class="mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <circle cx="20" cy="20" r="18" stroke="var(--violet)" stroke-width="1.4" opacity=".55"/>
+    <circle cx="20" cy="20" r="11" stroke="var(--violet)" stroke-width="1.2" opacity=".4"/>
+    <line x1="20" y1="2" x2="20" y2="38" stroke="var(--violet)" stroke-width="1" opacity=".3"/>
+    <line x1="2" y1="20" x2="38" y2="20" stroke="var(--violet)" stroke-width="1" opacity=".3"/>
+    <path d="M20 20 L20 3 A17 17 0 0 1 35 13 Z" fill="var(--phosphor)" opacity=".22"/>
+    <line x1="20" y1="20" x2="20" y2="3" stroke="var(--phosphor)" stroke-width="1.6"/>
+    <circle cx="28.5" cy="12.5" r="2.4" fill="var(--phosphor)"/>
+  </svg>`;
+
+  const ic = {
+    mice:`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="18" rx="6"/><line x1="12" y1="7" x2="12" y2="11"/></svg>`,
+    keyboards:`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><line x1="6" y1="10" x2="6" y2="10"/><line x1="10" y1="10" x2="10" y2="10"/><line x1="14" y1="10" x2="14" y2="10"/><line x1="18" y1="10" x2="18" y2="10"/><line x1="7" y1="14" x2="17" y2="14"/></svg>`,
+    headsets:`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2" y="13" width="4" height="7" rx="2"/><rect x="18" y="13" width="4" height="7" rx="2"/></svg>`,
+    monitors:`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>`,
+    chairs:`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8h12V3"/><path d="M5 11h14l-1 5H6z"/><line x1="9" y1="16" x2="8" y2="21"/><line x1="15" y1="16" x2="16" y2="21"/></svg>`,
+    mousepads:`<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/></svg>`,
+    honest:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>`,
+    compare:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M12 6l-6 4 6 3"/><path d="M12 6l6 4-6 3"/></svg>`,
+    budget:`<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.7-1.5-3-1.5-1.7 0-3 .9-3 2.2 0 2.8 6 1.3 6 4.1 0 1.3-1.3 2.2-3 2.2-1.3 0-2.5-.5-3-1.5"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`
+  };
+
+  const mice = [
+    { rank:1, name:"Logitech G Pro X Superlight 2", slug:"logitech-g-pro-x-superlight-2", price:"$159.99", priceNum:159.99, typical:"$130 – $160", score:9.6,
+      tags:["Competitive FPS","Ultra-light Wireless"], desc:"One of the safest recommendations for competitive gaming thanks to its performance, reliability, lightweight design, and excellent wireless technology.",
+      best:"Competitive FPS players and esports users",
+      pros:["Extremely lightweight (60g)","Excellent wireless performance","Long battery life","Accurate HERO 2 sensor"],
+      cons:["Expensive","No RGB","Limited buttons"],
+      specs:{Weight:"60g",Sensor:"HERO 2",DPI:"Up to 44,000","Polling Rate":"Up to 4000Hz",Connectivity:"LIGHTSPEED + USB-C",Battery:"Up to 95 hours",Buttons:"5",RGB:"No"} },
+    { rank:2, name:"Razer DeathAdder V3 Pro", slug:"razer-deathadder-v3-pro", price:"$149.99", priceNum:149.99, typical:"$120 – $150", score:9.4,
+      tags:["Ergonomic","Competitive FPS"], desc:"A top ergonomic choice with excellent performance and a comfortable shape.", best:"Palm grip users and FPS gamers" },
+    { rank:3, name:"Razer Viper V3 Pro", slug:"razer-viper-v3-pro", price:"$159.99", priceNum:159.99, typical:"$130 – $160", score:9.3,
+      tags:["Competitive FPS","Ambidextrous"], desc:"One of the fastest competitive mice available with excellent latency and tracking.", best:"Esports FPS players using claw or fingertip grip" },
+    { rank:4, name:"Logitech G Pro X Superlight", slug:"logitech-g-pro-x-superlight", price:"$149.99", priceNum:149.99, typical:"$110 – $150", score:9.1,
+      tags:["Competitive FPS","Wireless"], desc:"Still one of the most popular gaming mice due to its reliability and shape.", best:"Players wanting a proven esports mouse" },
+    { rank:5, name:"Pulsar X2V2 Wireless", slug:"pulsar-x2v2-wireless", price:"$99.95", priceNum:99.95, typical:"$85 – $100", score:9.0,
+      tags:["Ultra-light","Value"], desc:"Excellent value with competitive performance and a lightweight design.", best:"Players wanting premium performance at a lower price" },
+    { rank:6, name:"Lamzu Atlantis OG V2 Pro", slug:"lamzu-atlantis-og-v2-pro", price:"$99 – $120", priceNum:99, typical:"$99 – $120", score:8.8,
+      tags:["Competitive FPS","Wireless"], desc:"A favorite among enthusiasts for its shape and performance.", best:"Claw grip players" },
+    { rank:7, name:"Finalmouse UltralightX", slug:"finalmouse-ultralightx", price:"$189.99+", priceNum:189.99, typical:"$190+", score:8.5,
+      tags:["Premium","Ultra-light"], desc:"Extremely light and innovative, but expensive and difficult to buy.", best:"Collectors and competitive enthusiasts" },
+    { rank:8, name:"SteelSeries Aerox 5 Wireless", slug:"steelseries-aerox-5-wireless", price:"$139.99", priceNum:139.99, typical:"$100 – $140", score:8.6,
+      tags:["Multi-genre","RGB"], desc:"A versatile mouse with more buttons and RGB.", best:"MMO, FPS, and general gaming" },
+    { rank:9, name:"Endgame Gear OP1 8K", slug:"endgame-gear-op1-8k", price:"$74.99", priceNum:74.99, typical:"$60 – $75", score:8.7,
+      tags:["Wired","8000Hz","Value"], desc:"Excellent performance for a low price.", best:"Competitive FPS players wanting 8000Hz polling" },
+    { rank:10, name:"Corsair M75 Air Wireless", slug:"corsair-m75-air-wireless", price:"$99.99", priceNum:99.99, typical:"$90 – $100", score:8.4,
+      tags:["Ultra-light","Wireless"], desc:"A lightweight option with excellent battery life.", best:"FPS players wanting a simple wireless mouse" }
+  ];
+
+  const keyboards = [
+    { rank:1, name:"Wooting 60HE+", slug:"wooting-60he-plus", price:"$174.99", priceNum:174.99, typical:"$175", score:9.5,
+      tags:["Hall Effect","Competitive"], desc:"Industry-leading Hall Effect tech with Rapid Trigger and deep customization for the fastest possible key response.", best:"Competitive FPS players who want the fastest key response and customizable actuation" },
+    { rank:2, name:"SteelSeries Apex Pro Mini", slug:"steelseries-apex-pro-mini", price:"$179.99", priceNum:179.99, typical:"$150 – $180", score:9.3,
+      tags:["Hall Effect","60%"], desc:"OmniPoint 2.0 switches with adjustable actuation deliver fast performance in a compact form.", best:"Esports players who want a compact keyboard with adjustable actuation" },
+    { rank:3, name:"Razer Huntsman V3 Pro TKL", slug:"razer-huntsman-v3-pro-tkl", price:"$219.99", priceNum:219.99, typical:"$180 – $220", score:9.2,
+      tags:["Optical","Rapid Trigger"], desc:"Gen-2 Analog Optical switches with Rapid Trigger for tournament-grade responsiveness.", best:"Competitive FPS players who want adjustable optical switches" },
+    { rank:4, name:"Keychron Q1 HE", slug:"keychron-q1-he", price:"$219.99", priceNum:219.99, typical:"$200 – $220", score:9.1,
+      tags:["Hall Effect","Premium"], desc:"Enthusiast craftsmanship meets Hall Effect tech — great for both competitive gaming and productivity.", best:"Gamers who want top-tier performance without sacrificing typing feel" },
+    { rank:5, name:"Logitech G Pro X TKL Rapid", slug:"logitech-g-pro-x-tkl-rapid", price:"$169.99", priceNum:169.99, typical:"$150 – $170", score:9.0,
+      tags:["Hall Effect","TKL"], desc:"A magnetic-switch keyboard engineered for competitive play with a clean, tournament-ready design.", best:"Esports players looking for a tournament-ready TKL keyboard" },
+    { rank:6, name:"ASUS ROG Azoth", slug:"asus-rog-azoth", price:"$249.99", priceNum:249.99, typical:"$220 – $250", score:8.9,
+      tags:["Wireless","OLED","Premium"], desc:"Tri-mode connectivity, an OLED display, and exceptional build quality with long battery life.", best:"Gamers who want one keyboard for gaming, work, and customization" },
+    { rank:7, name:"Corsair K70 Pro Mini Wireless", slug:"corsair-k70-pro-mini-wireless", price:"$179.99", priceNum:179.99, typical:"$150 – $180", score:8.7,
+      tags:["Wireless","Hot-swap","60%"], desc:"Hot-swappable switches and ultra-fast Slipstream Wireless in a compact 60% layout.", best:"Gamers who want a compact wireless keyboard with hot-swappable switches" },
+    { rank:8, name:"NuPhy Air75 HE", slug:"nuphy-air75-he", price:"$149.95", priceNum:149.95, typical:"$130 – $150", score:8.6,
+      tags:["Low-profile","Hall Effect"], desc:"Magnetic switches paired with premium typing comfort in an ultra-slim, portable package.", best:"Gamers who want Hall Effect performance in a slim, portable board" },
+    { rank:9, name:"HyperX Alloy Origins", slug:"hyperx-alloy-origins", price:"$89.99", priceNum:89.99, typical:"$70 – $90", score:8.8,
+      tags:["Mechanical","Value"], desc:"An aluminum frame and smooth switches deliver dependable performance at a budget-friendly price.", best:"Budget-conscious gamers wanting great performance under $100" },
+    { rank:10, name:"Razer BlackWidow V4 Pro", slug:"razer-blackwidow-v4-pro", price:"$229.99", priceNum:229.99, typical:"$200 – $230", score:8.5,
+      tags:["Full-size","Macros"], desc:"A feature-rich full-size board with dedicated macro keys, a command dial, and media controls.", best:"Streamers, MMO players, and creators who want a feature-packed board" }
+  ];
+
+  const categories = [
+    { slug:"mice", name:"Mice", icon:ic.mice, status:"live", blurb:"Top-ranked gaming mice, from ultra-light competitive picks to everyday value options.", products:mice },
+    { slug:"keyboards", name:"Keyboards", icon:ic.keyboards, status:"live", blurb:"Mechanical and Hall Effect keyboards built for speed and comfort.", products:keyboards },
+    { slug:"headsets", name:"Headsets", icon:ic.headsets, status:"soon", blurb:"Wired and wireless headsets ranked on audio, mic clarity, and comfort.", products:[] },
+    { slug:"monitors", name:"Monitors", icon:ic.monitors, status:"soon", blurb:"High-refresh gaming monitors compared on latency, panel, and value.", products:[] },
+    { slug:"chairs", name:"Chairs", icon:ic.chairs, status:"soon", blurb:"Gaming and ergonomic chairs graded on support, build, and long-session comfort.", products:[] },
+    { slug:"mousepads", name:"Mouse Pads", icon:ic.mousepads, status:"soon", blurb:"Speed vs. control surfaces ranked for glide, stopping power, and durability.", products:[] }
+  ];
+
+  const catBySlug = s => categories.find(c => c.slug === s);
+  const findProduct = (cs, ps) => { const c = catBySlug(cs); return c ? c.products.find(p => p.slug === ps) : null; };
+  const gaugeColor = s => s >= 9.0 ? "var(--phosphor)" : (s >= 8.6 ? "var(--violet-br)" : "var(--amber)");
+
+  /* ============================ STATE ============================ */
+  const store = {
+    get compare(){ try{ return JSON.parse(localStorage.getItem("rr_compare")||"[]"); }catch(e){ return []; } },
+    set compare(v){ localStorage.setItem("rr_compare", JSON.stringify(v.slice(0,4))); },
+    get theme(){ return localStorage.getItem("rr_theme"); },
+    set theme(v){ localStorage.setItem("rr_theme", v); }
+  };
+  function toggleCompare(cs, slug){
+    const key = cs+"/"+slug; const arr = store.compare; const i = arr.indexOf(key);
+    if(i>=0) arr.splice(i,1); else { if(arr.length>=4) return false; arr.push(key); }
+    store.compare = arr; return true;
+  }
+  const inCompare = (cs, slug) => store.compare.indexOf(cs+"/"+slug) >= 0;
+
+  /* ============================ HELPERS ============================ */
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const buyLinks = name => ([
+    { store:"Amazon", url:"https://www.amazon.com/s?k="+encodeURIComponent(name) },
+    { store:"Best Buy", url:"https://www.bestbuy.com/site/searchpage.jsp?st="+encodeURIComponent(name) },
+    { store:"Newegg", url:"https://www.newegg.com/p/pl?d="+encodeURIComponent(name) }
+  ]);
+  const extIcon = `<svg class="ext" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M8 7h9v9"/></svg>`;
+
+  function gaugeHTML(score, size){
+    return `<div class="gauge ${size}" data-v="${score*10}" style="--gc:${gaugeColor(score)}"><span class="g-num tnum">${score.toFixed(1)}</span>${size==="lg"?'<span class="g-sub">Signal</span>':''}</div>`;
+  }
+
+  /* ============================ HEADER / FOOTER ============================ */
+  function header(route){
+    const n = store.compare.length;
+    const link = (href,label) => `<a href="#${href}" data-route="${href}" class="${route===href||(href!=='/'&&route.indexOf(href)===0)?'active':''}">${label}</a>`;
+    return `<header class="nav"><div class="wrap nav-in">
+      <a class="brand" href="#/" data-route="/">${svgLogo}<span class="wordmark">Rig<b>Radar</b><small>Gear Intel · Est. 2026</small></span></a>
+      <nav class="links" id="navlinks">
+        ${link('/','Home')}${link('/reviews','Reviews')}${link('/guides','Guides')}${link('/about','About')}
+      </nav>
+      <div class="nav-tools">
+        <button class="cmp-btn" data-nav="/compare" aria-label="Compare tray"><span class="txt">Compare</span>${n?`<span class="n tnum">${n}</span>`:''}</button>
+        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle light / dark"></button>
+        <button class="icon-btn hamb" id="hambBtn" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+      </div>
+    </div></header>`;
+  }
+
+  function footer(){
+    return `<footer class="foot"><div class="wrap">
+      <div class="foot-in">
+        <div style="max-width:300px">
+          <a class="brand" href="#/" data-route="/">${svgLogo}<span class="wordmark">Rig<b>Radar</b></span></a>
+          <p style="color:var(--muted);font-size:13.5px;margin:16px 0 0">We don't test gear — we analyze everyone who does, then rank what the consensus actually supports.</p>
+        </div>
+        <div class="foot-cols">
+          <div class="foot-col"><h5>Reviews</h5>
+            <a href="#/c/mice" data-nav="/c/mice">Mice</a><a href="#/c/keyboards" data-nav="/c/keyboards">Keyboards</a>
+            <a href="#/reviews" data-route="/reviews">All categories</a><a href="#/compare" data-nav="/compare">Compare gear</a></div>
+          <div class="foot-col"><h5>Platform</h5>
+            <a href="#/about" data-route="/about">Our method</a><a href="#/guides" data-route="/guides">Buying guides</a>
+            <a href="#/reviews" data-route="/reviews">Browse reviews</a></div>
+        </div>
+      </div>
+      <div class="foot-bottom"><span>© 2026 RigRadar. Honest gear reviews, no hype.</span><span>Buy Smarter. Play Better.</span></div>
+    </div></footer>`;
+  }
+
+  /* ============================ ROUTES ============================ */
+  function viewHome(){
+    const topMouse = mice[0], topKb = keyboards[0];
+    const feat = (cat, p) => `<div class="feat" data-nav="/p/${cat.slug}/${p.slug}">
+      ${gaugeHTML(p.score,"sm")}
+      <div class="fmeta">
+        <div class="top">${cat.icon.replace('width="26" height="26"','width="15" height="15"')} ${cat.name} · Rank #${p.rank}</div>
+        <h3>${esc(p.name)}</h3><div class="d">${esc(p.desc.slice(0,86))}${p.desc.length>86?'…':''}</div>
+        <div class="p"><span class="price tnum">${esc(p.price)}</span><span class="link-arrow">See review →</span></div>
+      </div></div>`;
+
+    return `
+    <section class="hero"><div class="wrap"><div class="hero-grid">
+      <div class="rv in">
+        <span class="eyebrow">Gaming Gear Platform · Est. 2026</span>
+        <h1><span class="lo">Buy Smarter.</span><span class="hi">Play Better.</span></h1>
+        <p class="lead">Honest gaming-gear rankings built from expert reviews and thousands of verified buyers — cross-referenced into one clear signal, whatever your budget.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" data-nav="/reviews">Browse the rankings ${extIcon.replace('class="ext"','').replace('width="15" height="15"','width="16" height="16"')}</button>
+          <button class="btn btn-ghost" data-route="/about">How scoring works</button>
+        </div>
+        <div class="hero-strip">
+          <div class="s"><div class="k tnum"><b>20</b></div><div class="l">Products ranked</div></div>
+          <div class="s"><div class="k tnum"><b>2</b> live</div><div class="l">Categories</div></div>
+          <div class="s"><div class="k">100% <b>free</b></div><div class="l">No paywalls, no hype</div></div>
+        </div>
+      </div>
+      <div class="radar-shell rv in">
+        <span class="radar-badge"><span class="dot"></span>Scanning market</span>
+        <canvas id="radar" width="600" height="600"></canvas>
+        <span class="radar-readout">Consensus feed · live<br>expert + buyer signal</span>
+      </div>
+    </div></div></section>
+
+    <section class="band"><div class="wrap">
+      <div class="sec-head rv"><div><span class="eyebrow">Why RigRadar</span><h2>Signal, not sales pitch.</h2>
+        <p>Most gear sites drown you in jargon or push whatever pays the highest commission. We do the opposite.</p></div></div>
+      <div class="pillars">
+        <div class="pillar rv"><div class="pn">01</div><div class="pic">${ic.honest}</div><h3>Honest rankings</h3><p>Real research and real trade-offs on every product — the good and the bad, written to help you decide.</p></div>
+        <div class="pillar rv"><div class="pn">02</div><div class="pic">${ic.compare}</div><h3>Side-by-side</h3><p>Line any picks up against each other and see exactly how they stack up before you spend a cent.</p></div>
+        <div class="pillar rv"><div class="pn">03</div><div class="pic">${ic.budget}</div><h3>Budget-aware</h3><p>Pricing that reflects what you can actually find — matched to what you want to spend, not a headline.</p></div>
+      </div>
+    </div></section>
+
+    <section class="band" style="padding-top:8px"><div class="wrap">
+      <div class="sec-head rv"><div><span class="eyebrow">Top of the radar</span><h2>This week's #1 picks.</h2></div>
+        <a class="link-arrow" href="#/reviews" data-route="/reviews">All rankings →</a></div>
+      <div class="feat-grid">
+        <div class="rv">${feat(categories[0], topMouse)}</div>
+        <div class="rv">${feat(categories[1], topKb)}</div>
+      </div>
+    </div></section>
+
+    <section class="band"><div class="wrap">
+      <div class="sec-head rv"><div><span class="eyebrow">The method</span><h2>How the signal gets built.</h2>
+        <p>One reviewer's opinion isn't the whole picture. Here's the four-step process behind every ranking.</p></div></div>
+      <div class="method">
+        <div class="step rv"><div class="num">01 — Collect</div><h3>Gather</h3><p>We pull findings from professional reviewers, tech publications, and thousands of verified buyers.</p></div>
+        <div class="step rv"><div class="num">02 — Cross-reference</div><h3>Compare</h3><p>Every source is checked against the others to filter out one-off outliers and noise.</p></div>
+        <div class="step rv"><div class="num">03 — Score</div><h3>Weigh</h3><p>Products are scored on real-world consensus data, not a single tester's subjective take.</p></div>
+        <div class="step rv"><div class="num">04 — Recommend</div><h3>Rank</h3><p>The data becomes clear, budget-aware picks — so you can buy with confidence.</p></div>
+      </div>
+    </div></section>
+
+    <section class="band"><div class="wrap"><div class="cta-card rv">
+      <span class="eyebrow plain" style="justify-content:center">Coming soon</span>
+      <h2 style="margin-top:12px">Headsets, monitors, chairs &amp; guides.</h2>
+      <p>We're building out the full catalog. Drop your email and we'll ping you the moment a new category goes live — no spam, unsubscribe anytime.</p>
+      <form class="wl" data-waitlist="homepage"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Notify me</button></form>
+      <div class="wl-note">Front-end demo · emails are stored locally in your browser only.</div>
+    </div></div></section>`;
+  }
+
+  function viewReviews(){
+    const live = categories.filter(c=>c.status==="live");
+    const soon = categories.filter(c=>c.status==="soon");
+    const liveCard = c => `<div class="cat-card live rv" data-nav="/c/${c.slug}">
+      <div class="cic">${c.icon}</div><h3>${c.name}</h3><div class="cd">${esc(c.blurb)}</div>
+      <div class="cfoot"><span class="pill live">Top 10 ranked</span><span class="link-arrow" style="margin-left:auto">View →</span></div></div>`;
+    const soonCard = c => `<div class="cat-card soon rv"><div class="cic" style="opacity:.6">${c.icon}</div><h3>${c.name}</h3>
+      <div class="cfoot"><span class="pill soon">Coming soon</span></div></div>`;
+    return `${sectionHead("Gear Reviews","Browse by category","Every category is ranked from real specifications, expert reviews, and community feedback — updated as the market moves.")}
+      <section class="band" style="padding-top:0"><div class="wrap">
+        <div class="cat-grid">${live.map(liveCard).join("")}</div>
+        <div class="sec-head rv" style="margin:44px 0 22px"><div><span class="eyebrow">More categories</span></div></div>
+        <div class="cat-grid more">${soon.map(soonCard).join("")}</div>
+        <div class="cta-card rv" style="margin-top:36px;padding:34px">
+          <h2 style="font-size:24px">Want a category prioritized?</h2>
+          <p>Tell us what you're shopping for next and we'll bump it up the queue.</p>
+          <form class="wl" data-waitlist="reviews"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Request &amp; notify me</button></form>
+          <div class="wl-note">Front-end demo · stored locally in your browser only.</div>
+        </div>
+      </div></section>`;
+  }
+
+  function viewCategory(slug){
+    const c = catBySlug(slug);
+    if(!c) return notFound();
+    if(c.status!=="live") return comingSoonCategory(c);
+    return `${sectionHead("Gear Reviews · "+c.name, "Top 10 "+categoryTitle(c), "Ranked using real specifications, expert reviews, and community feedback. Last updated July 6, 2026.")}
+      <section class="band" style="padding-top:0"><div class="wrap">
+        <div class="controls rv">
+          <div class="search"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="catSearch" type="search" placeholder="Search ${c.name.toLowerCase()} by name or feature…" aria-label="Search"></div>
+          <div class="seg" id="catSort" role="tablist" aria-label="Sort">
+            <button data-sort="rank" class="on">Rank</button><button data-sort="score">Signal ↓</button>
+            <button data-sort="plow">Price ↑</button><button data-sort="phigh">Price ↓</button>
+          </div>
+        </div>
+        <div class="rank-list" id="rankList"></div>
+      </div></section>`;
+  }
+
+  function contactHTML(c, p){
+    const on = inCompare(c.slug,p.slug);
+    return `<article class="contact rv" data-slug="${p.slug}">
+      <div class="rk ${p.rank===1?'top':''} tnum">#${p.rank}</div>
+      ${gaugeHTML(p.score,"sm")}
+      <div class="c-body" data-nav="/p/${c.slug}/${p.slug}">
+        <div class="cname">${esc(p.name)}</div>
+        <div class="ctags">${p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>
+        <p class="cdesc">${esc(p.desc)}</p>
+        <div class="cbest"><b>Best for</b> · ${esc(p.best)}</div>
+      </div>
+      <div class="c-right">
+        <span class="price tnum">${esc(p.price)}</span>
+        <div class="c-actions">
+          <button class="mini cmp-toggle ${on?'on':''}" data-cat="${c.slug}" data-slug="${p.slug}" title="Add to compare" aria-label="Add to compare">${ic.compare.replace('width="22" height="22"','width="16" height="16"')}</button>
+          <a class="mini" href="#/p/${c.slug}/${p.slug}" data-nav="/p/${c.slug}/${p.slug}" title="Open review" aria-label="Open review"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </div>
+      </div>
+    </article>`;
+  }
+
+  function viewProduct(cs, ps){
+    const c = catBySlug(cs); const p = findProduct(cs, ps);
+    if(!c || !p) return notFound();
+    const on = inCompare(cs, ps);
+    const hasSpecs = !!p.specs, hasPC = !!(p.pros||p.cons);
+    const specsHTML = hasSpecs ? `<h2 class="block-t">Specifications</h2><div class="spec-grid">${
+      Object.entries(p.specs).map(([k,v])=>`<div class="spec"><div class="sk">${esc(k)}</div><div class="sv">${esc(v)}</div></div>`).join("")}</div>` : "";
+    const pcHTML = hasPC ? `<div class="pc-grid">
+        <div class="pc pros"><h4>Pros</h4><ul>${(p.pros||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div class="pc cons"><h4>Cons</h4><ul>${(p.cons||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      </div>` : "";
+    const bars = [
+      {l:"Performance", v:Math.min(100, p.score*10+2)},
+      {l:"Value", v:Math.max(40, 118 - p.priceNum/2.6)},
+      {l:"Consensus", v:p.score*10}
+    ];
+    return `<section class="band" style="padding-top:0"><div class="wrap">
+      <a class="back" href="#/c/${cs}" data-nav="/c/${cs}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> All ${c.name.toLowerCase()}</a>
+      <div class="prod-grid">
+        <div>
+          <div class="prod-head rv">
+            <span class="eyebrow">Rank #${p.rank} · ${p.tags.join(" / ")}</span>
+            <h1>${esc(p.name)}</h1>
+            <div class="prod-price"><span class="price tnum">${esc(p.price)}</span><span class="typ">Typical: ${esc(p.typical)}</span></div>
+            <div class="prod-best">Best for · <b>${esc(p.best)}</b></div>
+          </div>
+          <div class="verdict rv"><span class="eyebrow">RigRadar Verdict</span><p>${esc(p.desc)}</p></div>
+          ${pcHTML}
+          ${specsHTML}
+          ${!hasSpecs?`<div class="verdict rv" style="border-left-color:var(--amber);margin-top:20px"><span class="eyebrow plain" style="color:var(--amber)">Deep-dive in progress</span><p style="color:var(--muted);font-size:14.5px">Full spec sheet and pros/cons breakdown for this pick are being finalized. The ranking and verdict above reflect our current cross-referenced consensus.</p></div>`:""}
+        </div>
+        <aside>
+          <div class="score-panel rv">
+            <div class="sp-top">${gaugeHTML(p.score,"lg")}<div><div class="sp-lab">RigRadar Signal</div><div class="sp-rank">Rank #${p.rank} of 10</div><div class="sp-lab" style="margin-top:8px;color:var(--muted)">in ${c.name}</div></div></div>
+            <div class="bars">${bars.map(b=>`<div class="bar"><div class="bl"><span>${b.l}</span><span class="tnum">${Math.round(b.v)}</span></div><div class="bt"><div class="bf" data-w="${Math.round(b.v)}"></div></div></div>`).join("")}</div>
+            <button class="btn ${on?'btn-ghost':'btn-primary'} btn-block cmp-toggle" style="margin-top:18px" data-cat="${cs}" data-slug="${ps}">${on?'✓ In compare':'Add to compare'}</button>
+            <div style="margin-top:20px"><div class="sp-lab" style="margin-bottom:10px">Where to buy</div>
+              <div class="buy-list">${buyLinks(p.name).map(b=>`<a class="buy" href="${b.url}" target="_blank" rel="noopener noreferrer">${b.store} ${extIcon}</a>`).join("")}</div>
+              <div class="buy-note">Links open a live product search at each retailer. Prices vary by region and change often — always confirm before buying. RigRadar is reader-first and independent.</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div></section>`;
+  }
+
+  function viewCompare(){
+    const keys = store.compare;
+    const items = keys.map(k=>{ const [cs,ps]=k.split("/"); return { cs, c:catBySlug(cs), p:findProduct(cs,ps) }; }).filter(x=>x.p);
+    const head = sectionHead("Head to head","Compare gear","Line up to four picks and see exactly how they stack up — signal, price, and the details that matter.");
+    if(items.length===0){
+      return head + `<section class="band" style="padding-top:0"><div class="wrap"><div class="empty rv">
+        <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="21"/><path d="M12 6l-6 4 6 3"/><path d="M12 6l6 4-6 3"/></svg>
+        <h3 style="font-size:20px;color:var(--text)">Nothing to compare yet</h3>
+        <p style="margin:10px 0 22px">Add products from any ranking with the compare button, then come back here.</p>
+        <button class="btn btn-primary" data-nav="/reviews">Browse rankings</button></div></div></section>`;
+    }
+    const rows = [
+      ["Signal", x=>gaugeHTML(x.p.score,"sm")],
+      ["Rank", x=>`<span class="mono" style="color:var(--violet-br);font-weight:700">#${x.p.rank}</span> <span class="mono" style="color:var(--faint)">in ${x.c.name}</span>`],
+      ["Price", x=>`<span class="price tnum">${esc(x.p.price)}</span>`],
+      ["Typical price", x=>`<span class="mono" style="font-size:13px">${esc(x.p.typical)}</span>`],
+      ["Category", x=>x.p.tags.map(t=>`<span class="tag">${esc(t)}</span>`).join(" ")],
+      ["Best for", x=>`<span style="font-size:14px;color:var(--muted)">${esc(x.p.best)}</span>`],
+      ["Verdict", x=>`<span style="font-size:13.5px;color:var(--muted)">${esc(x.p.desc)}</span>`],
+      ["", x=>`<a class="btn btn-ghost btn-sm" href="#/p/${x.cs}/${x.p.slug}" data-nav="/p/${x.cs}/${x.p.slug}">Open review</a>`]
+    ];
+    return head + `<section class="band" style="padding-top:0"><div class="wrap"><div class="cmp-wrap rv"><table class="cmp">
+      <thead><tr><th></th>${items.map(x=>`<th><button class="rm cmp-remove" data-cat="${x.cs}" data-slug="${x.p.slug}" aria-label="Remove">✕</button><div class="cph">${esc(x.p.name)}</div><div class="cpt">${esc(x.c.name)}</div></th>`).join("")}</tr></thead>
+      <tbody>${rows.map(([label,fn])=>`<tr>${label?`<th>${label}</th>`:'<th></th>'}${items.map(x=>`<td>${fn(x)}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table></div></div></section>`;
+  }
+
+  function viewGuides(){
+    return `${sectionHead("Buying Guides","Guides are on the way","Once we've reviewed enough gear across every price range, we'll publish honest, budget-aware buying guides you can actually trust.")}
+      <section class="band" style="padding-top:0"><div class="wrap"><div class="cta-card rv">
+        <span class="eyebrow plain" style="justify-content:center">In the workshop</span>
+        <h2 style="margin-top:12px">"Best gaming mouse under $100." Done right.</h2>
+        <p>No affiliate-bait listicles. Each guide will pull straight from our cross-referenced rankings, sorted by budget and use-case. Want first access?</p>
+        <form class="wl" data-waitlist="guides"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Get first access</button></form>
+        <div class="wl-note">Front-end demo · stored locally in your browser only.</div>
+      </div>
+      <div class="pillars" style="margin-top:28px">
+        <div class="pillar rv"><div class="pn">Planned</div><h3 style="margin-top:14px">Best budget picks</h3><p>The strongest gear at every price ceiling, from $50 to flagship.</p></div>
+        <div class="pillar rv"><div class="pn">Planned</div><h3 style="margin-top:14px">By use-case</h3><p>Competitive FPS, MMO, streaming, and all-round setups.</p></div>
+        <div class="pillar rv"><div class="pn">Planned</div><h3 style="margin-top:14px">Full-setup builds</h3><p>Matched mouse + keyboard + audio loadouts that work together.</p></div>
+      </div></div></section>`;
+  }
+
+  function viewAbout(){
+    return `<section class="band about-hero"><div class="wrap">
+      <div class="rv" style="max-width:760px">
+        <span class="eyebrow">About Us · Data-Driven Reviews</span>
+        <h1>We don't test gear.<br>We analyze everyone who does.</h1>
+        <p class="lead" style="max-width:60ch">RigRadar was built on a simple idea: one reviewer's opinion isn't the whole picture. So we aggregate real feedback from experts and everyday buyers, then look for where they agree.</p>
+      </div>
+      <div class="about-stats">
+        <div class="astat rv"><div class="k tnum">100%</div><div class="l">Budget-aware recommendations</div></div>
+        <div class="astat rv"><div class="k">Multiple</div><div class="l">Independent sources per product</div></div>
+        <div class="astat rv"><div class="k">Real</div><div class="l">Buyers &amp; experts, cross-referenced</div></div>
+      </div>
+    </div></section>
+    <section class="band" style="padding-top:12px"><div class="wrap">
+      <div class="sec-head rv"><div><span class="eyebrow">Our method</span><h2>Four steps, every ranking.</h2></div></div>
+      <div class="method">
+        <div class="step rv"><div class="num">01 — Collect</div><h3>Collect</h3><p>We gather findings from professional reviewers, tech publications, and thousands of verified buyers.</p></div>
+        <div class="step rv"><div class="num">02 — Cross-reference</div><h3>Cross-reference</h3><p>Every source is compared against the others to filter out one-off outliers and inconsistencies.</p></div>
+        <div class="step rv"><div class="num">03 — Score</div><h3>Score</h3><p>Products are scored using real-world consensus data, not a single tester's subjective take.</p></div>
+        <div class="step rv"><div class="num">04 — Recommend</div><h3>Recommend</h3><p>The data becomes clear, budget-aware picks, so you can buy with confidence at any price level.</p></div>
+      </div>
+    </div></section>
+    <section class="band" style="padding-top:8px"><div class="wrap">
+      <div class="sec-head rv"><div><span class="eyebrow">Our approach</span><h2>Where reviewers agree, we listen.</h2></div></div>
+      <div class="prose rv"><p>No two reviewers see a product the same way. A mouse one person calls "too small" is another's perfect fit. Instead of betting everything on a single take, we look for the <b>points of agreement</b> across many expert and everyday sources.</p>
+      <p>That agreement is what shapes our recommendations — so you get a clearer, more balanced picture before you buy, and a ranking you can actually trust.</p></div>
+    </div></section>
+    <section class="band"><div class="wrap"><div class="cta-card rv">
+      <h2>Ready to buy smarter?</h2>
+      <p>See the gear that made the cut, backed by real, cross-referenced data.</p>
+      <div style="margin-top:24px"><button class="btn btn-primary" data-nav="/reviews">Browse reviews</button></div>
+    </div></div></section>`;
+  }
+
+  /* shared bits */
+  function sectionHead(eyebrow, title, sub){
+    return `<section class="page-head"><div class="wrap"><div class="rv"><span class="eyebrow">${esc(eyebrow)}</span>
+      <h1>${esc(title)}</h1>${sub?`<p>${esc(sub)}</p>`:''}</div></div></section>`;
+  }
+  const categoryTitle = c => ({mice:"Gaming Mice",keyboards:"Gaming Keyboards"}[c.slug] || ("Gaming "+c.name));
+  function comingSoonCategory(c){
+    return `${sectionHead("Gear Reviews · "+c.name, c.name+" — coming soon", "This category isn't live yet. We're cross-referencing sources now — leave your email and we'll tell you the moment the "+c.name.toLowerCase()+" ranking drops.")}
+      <section class="band" style="padding-top:0"><div class="wrap"><div class="cta-card rv">
+        <div class="cic" style="width:60px;height:60px;margin:0 auto 8px;border-radius:15px;display:grid;place-items:center;background:var(--surface-3);border:1px solid var(--line);color:var(--violet-br)">${c.icon}</div>
+        <h2 style="margin-top:14px">${esc(c.name)} ranking in progress</h2>
+        <p>${esc(c.blurb)}</p>
+        <form class="wl" data-waitlist="cat-${c.slug}"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Notify me</button></form>
+        <div class="wl-note">Front-end demo · stored locally in your browser only.</div>
+      </div>
+      <div style="text-align:center;margin-top:26px"><a class="link-arrow" href="#/reviews" data-route="/reviews">← Back to all categories</a></div>
+      </div></section>`;
+  }
+  function notFound(){
+    return `<section class="band"><div class="wrap"><div class="empty">
+      <h3 style="font-size:24px;color:var(--text)">Off the radar</h3>
+      <p style="margin:10px 0 22px">We couldn't find that page.</p>
+      <button class="btn btn-primary" data-nav="/">Back to home</button></div></div></section>`;
+  }
+
+  /* ============================ ROUTER ============================ */
+  function parse(){
+    let h = location.hash.replace(/^#/,"") || "/";
+    const parts = h.split("/").filter(Boolean);
+    if(parts.length===0) return {route:"/", view:viewHome};
+    if(parts[0]==="reviews") return {route:"/reviews", view:viewReviews};
+    if(parts[0]==="guides") return {route:"/guides", view:viewGuides};
+    if(parts[0]==="about") return {route:"/about", view:viewAbout};
+    if(parts[0]==="compare") return {route:"/compare", view:viewCompare};
+    if(parts[0]==="c" && parts[1]) return {route:"/reviews", view:()=>viewCategory(parts[1])};
+    if(parts[0]==="p" && parts[1] && parts[2]) return {route:"/reviews", view:()=>viewProduct(parts[1],parts[2])};
+    return {route:h, view:notFound};
+  }
+
+  let radarRAF = null;
+  function render(){
+    if(radarRAF){ cancelAnimationFrame(radarRAF); radarRAF=null; }
+    const {route, view} = parse();
+    const app = document.getElementById("app");
+    app.innerHTML = header(route) + `<main>${view()}</main>` + footer();
+    window.scrollTo(0,0);
+    wireHeader();
+    afterRender(route);
+  }
+
+  /* ============================ POST-RENDER WIRING ============================ */
+  function afterRender(route){
+    setThemeBtn();
+    // reveal
+    const io = new IntersectionObserver((ents)=>{ ents.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } }); }, {threshold:.12, rootMargin:"0px 0px -40px 0px"});
+    document.querySelectorAll(".rv:not(.in)").forEach(el=>io.observe(el));
+    // gauges + bars animate
+    requestAnimationFrame(()=>{ setTimeout(()=>{
+      document.querySelectorAll(".gauge[data-v]").forEach(g=>g.style.setProperty("--v", g.getAttribute("data-v")));
+      document.querySelectorAll(".bf[data-w]").forEach(b=>b.style.width = b.getAttribute("data-w")+"%");
+    }, 60); });
+    // category list
+    if(document.getElementById("rankList")) wireCategory();
+    // radar
+    if(document.getElementById("radar")) initRadar();
+    // waitlist
+    document.querySelectorAll("form[data-waitlist]").forEach(wireWaitlist);
+    // compare toggles / removes
+    document.querySelectorAll(".cmp-toggle").forEach(b=>b.addEventListener("click", onCompareToggle));
+    document.querySelectorAll(".cmp-remove").forEach(b=>b.addEventListener("click", (e)=>{ e.stopPropagation(); toggleCompare(b.dataset.cat,b.dataset.slug); render(); }));
+    // nav clicks (buttons / cards with data-nav)
+    document.querySelectorAll("[data-nav]").forEach(el=>{
+      if(el.tagName==="A") return;
+      el.addEventListener("click",(e)=>{ if(e.target.closest(".cmp-toggle")) return; location.hash = el.getAttribute("data-nav"); });
+    });
+  }
+
+  function wireHeader(){
+    document.querySelectorAll("[data-route]").forEach(a=>{}); // anchors use hash natively
+    const hamb = document.getElementById("hambBtn"), links = document.getElementById("navlinks");
+    if(hamb) hamb.addEventListener("click", ()=>links.classList.toggle("open"));
+    if(links) links.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>links.classList.remove("open")));
+    const t = document.getElementById("themeBtn");
+    if(t) t.addEventListener("click", toggleTheme);
+    document.querySelector(".cmp-btn").addEventListener("click", ()=>location.hash="/compare");
+  }
+
+  function onCompareToggle(e){
+    e.preventDefault(); e.stopPropagation();
+    const btn=e.currentTarget; const ok=toggleCompare(btn.dataset.cat, btn.dataset.slug);
+    if(!ok){ btn.animate([{transform:"translateX(0)"},{transform:"translateX(-4px)"},{transform:"translateX(4px)"},{transform:"translateX(0)"}],{duration:220}); return; }
+    render();
+  }
+
+  /* ---------- category interactions ---------- */
+  function wireCategory(){
+    const slug = parse(); const cs = location.hash.split("/")[2];
+    const c = catBySlug(cs); if(!c) return;
+    const listEl = document.getElementById("rankList");
+    let q="", sort="rank";
+    const draw = ()=>{
+      let arr = c.products.slice();
+      if(q){ const t=q.toLowerCase(); arr=arr.filter(p=>(p.name+" "+p.tags.join(" ")+" "+p.desc).toLowerCase().includes(t)); }
+      if(sort==="rank") arr.sort((a,b)=>a.rank-b.rank);
+      if(sort==="score") arr.sort((a,b)=>b.score-a.score);
+      if(sort==="plow") arr.sort((a,b)=>a.priceNum-b.priceNum);
+      if(sort==="phigh") arr.sort((a,b)=>b.priceNum-a.priceNum);
+      listEl.innerHTML = arr.length ? arr.map(p=>contactHTML(c,p)).join("") : `<div class="empty"><p>No matches for "<b style="color:var(--text)">${esc(q)}</b>".</p></div>`;
+      // rewire the freshly drawn rows
+      listEl.querySelectorAll(".rv").forEach(el=>el.classList.add("in"));
+      listEl.querySelectorAll(".gauge[data-v]").forEach(g=>g.style.setProperty("--v", g.getAttribute("data-v")));
+      listEl.querySelectorAll("[data-nav]").forEach(el=>{ if(el.tagName!=="A") el.addEventListener("click",()=>location.hash=el.getAttribute("data-nav")); });
+      listEl.querySelectorAll(".c-body").forEach(el=>el.addEventListener("click",()=>location.hash=el.getAttribute("data-nav")));
+      listEl.querySelectorAll(".cmp-toggle").forEach(b=>b.addEventListener("click", onCompareToggle));
+    };
+    const s=document.getElementById("catSearch");
+    if(s) s.addEventListener("input",e=>{ q=e.target.value; draw(); });
+    document.querySelectorAll("#catSort button").forEach(b=>b.addEventListener("click",()=>{
+      document.querySelectorAll("#catSort button").forEach(x=>x.classList.remove("on")); b.classList.add("on"); sort=b.dataset.sort; draw();
+    }));
+    draw();
+  }
+
+  /* ---------- waitlist ---------- */
+  function wireWaitlist(form){
+    form.addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const input=form.querySelector("input"); const val=(input.value||"").trim();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)){ input.style.borderColor="var(--amber)"; input.focus(); return; }
+      try{ const arr=JSON.parse(localStorage.getItem("rr_waitlist")||"[]"); arr.push({email:val,at:Date.now(),src:form.dataset.waitlist}); localStorage.setItem("rr_waitlist",JSON.stringify(arr)); }catch(err){}
+      form.outerHTML = `<div class="wl-ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> You're on the list — we'll be in touch.</div>`;
+    });
+  }
+
+  /* ---------- theme ---------- */
+  function currentTheme(){
+    const set = store.theme;
+    if(set) return set;
+    return (window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches) ? "light" : "dark";
+  }
+  function setThemeBtn(){
+    const t=document.getElementById("themeBtn"); if(!t) return;
+    const dark = currentTheme()!=="light";
+    t.innerHTML = dark
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="7" y2="7"/><line x1="17" y1="17" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="7" y2="17"/><line x1="17" y1="7" x2="19.1" y2="4.9"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>`;
+  }
+  function applyTheme(){ document.documentElement.setAttribute("data-theme", currentTheme()); }
+  function toggleTheme(){ store.theme = currentTheme()==="light" ? "dark" : "light"; applyTheme(); setThemeBtn();
+    if(document.getElementById("radar")) initRadar(); }
+
+  /* ---------- radar canvas ---------- */
+  function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+  function initRadar(){
+    const canvas=document.getElementById("radar"); if(!canvas) return;
+    const ctx=canvas.getContext("2d");
+    const dpr=Math.min(2, window.devicePixelRatio||1);
+    function size(){ const r=canvas.getBoundingClientRect(); canvas.width=r.width*dpr; canvas.height=r.height*dpr; }
+    size();
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const phos = cssVar("--phosphor") || "#35f0a5";
+    const viol = cssVar("--violet") || "#a855f7";
+    const blips = [
+      {a:35, r:.58, live:true, label:"MICE"},
+      {a:128, r:.70, live:true, label:"KEYBOARDS"},
+      {a:205, r:.5, live:false, label:"HEADSETS"},
+      {a:288, r:.74, live:false, label:"MONITORS"},
+      {a:158, r:.86, live:false, label:"CHAIRS"},
+      {a:322, r:.4, live:false, label:"PADS"}
+    ].map(b=>({...b, glow:0}));
+    let sweep=0;
+    function toRad(d){ return d*Math.PI/180; }
+    function frame(){
+      const W=canvas.width, H=canvas.height, cx=W/2, cy=H/2, R=Math.min(W,H)*0.46;
+      ctx.clearRect(0,0,W,H);
+      // rings
+      ctx.lineWidth=1*dpr;
+      for(let i=1;i<=4;i++){ ctx.beginPath(); ctx.strokeStyle="rgba(168,120,247,"+(0.10+i*0.02)+")"; ctx.arc(cx,cy,R*i/4,0,Math.PI*2); ctx.stroke(); }
+      // cross
+      ctx.strokeStyle="rgba(168,120,247,0.12)";
+      ctx.beginPath(); ctx.moveTo(cx-R,cy); ctx.lineTo(cx+R,cy); ctx.moveTo(cx,cy-R); ctx.lineTo(cx,cy+R); ctx.stroke();
+      // diagonal ticks
+      ctx.beginPath(); const d=R*0.707; ctx.moveTo(cx-d,cy-d); ctx.lineTo(cx+d,cy+d); ctx.moveTo(cx-d,cy+d); ctx.lineTo(cx+d,cy-d);
+      ctx.strokeStyle="rgba(168,120,247,0.06)"; ctx.stroke();
+      // sweep wedge
+      const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+      grad.addColorStop(0,"rgba(53,240,165,0.28)"); grad.addColorStop(1,"rgba(53,240,165,0)");
+      ctx.save(); ctx.translate(cx,cy); ctx.rotate(toRad(sweep));
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,R,toRad(-24),0); ctx.closePath(); ctx.fillStyle=grad; ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(R,0); ctx.strokeStyle="rgba(53,240,165,0.55)"; ctx.lineWidth=1.5*dpr; ctx.stroke();
+      ctx.restore();
+      // blips
+      ctx.textAlign="center"; ctx.font=(10*dpr)+"px ui-monospace, monospace";
+      blips.forEach(b=>{
+        const x=cx+Math.cos(toRad(b.a))*R*b.r, y=cy+Math.sin(toRad(b.a))*R*b.r;
+        // pass detection
+        let diff=Math.abs(((sweep%360)-b.a+540)%360-180);
+        if(diff<7) b.glow=1;
+        b.glow*=0.975;
+        const base=b.live?0.55:0.28;
+        const col=b.live?phos:viol;
+        const alpha=Math.min(1, base + b.glow*0.6);
+        ctx.beginPath(); ctx.fillStyle=hexA(col, alpha);
+        ctx.arc(x,y,(b.live?3.4:2.6)*dpr + b.glow*3*dpr,0,Math.PI*2); ctx.fill();
+        if(b.glow>0.05){ ctx.beginPath(); ctx.strokeStyle=hexA(col, b.glow*0.5); ctx.lineWidth=1*dpr; ctx.arc(x,y,(6+b.glow*10)*dpr,0,Math.PI*2); ctx.stroke(); }
+        ctx.fillStyle=hexA(b.live?phos:viol, Math.min(0.9, 0.35+b.glow*0.6));
+        ctx.fillText(b.label, x, y-10*dpr);
+      });
+      // center
+      ctx.beginPath(); ctx.fillStyle=phos; ctx.arc(cx,cy,2.5*dpr,0,Math.PI*2); ctx.fill();
+      if(!reduce){ sweep=(sweep+0.9)%360; radarRAF=requestAnimationFrame(frame); }
+    }
+    if(reduce){ sweep=35; frame(); } else { radarRAF=requestAnimationFrame(frame); }
+    // handle resize once
+    let rt; window.addEventListener("resize", ()=>{ clearTimeout(rt); rt=setTimeout(()=>{ if(document.getElementById("radar")===canvas){ size(); } },200); }, {once:false});
+  }
+  function hexA(hex, a){
+    hex=hex.trim();
+    if(hex.startsWith("rgb")) return hex.replace(/rgba?\(([^)]+)\)/, (m,inner)=>{ const p=inner.split(",").slice(0,3).map(s=>s.trim()); return "rgba("+p.join(",")+","+a+")"; });
+    let h=hex.replace("#",""); if(h.length===3) h=h.split("").map(c=>c+c).join("");
+    const r=parseInt(h.slice(0,2),16), g=parseInt(h.slice(2,4),16), b=parseInt(h.slice(4,6),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  /* ============================ BOOT ============================ */
+  applyTheme();
+  window.addEventListener("hashchange", render);
+  render();
+})();
+</script>
+
+</body>
+</html>
