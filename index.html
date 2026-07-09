@@ -647,7 +647,7 @@
       <h2 style="margin-top:12px">Headsets, monitors, chairs &amp; guides.</h2>
       <p>We're building out the full catalog. Drop your email and we'll ping you the moment a new category goes live — no spam, unsubscribe anytime.</p>
       <form class="wl" data-waitlist="homepage"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Notify me</button></form>
-      <div class="wl-note">Front-end demo · emails are stored locally in your browser only.</div>
+      <div class="wl-note">We'll only use your email to notify you about new categories — no spam, unsubscribe anytime.</div>
     </div></div></section>`;
   }
 
@@ -668,7 +668,7 @@
           <h2 style="font-size:24px">Want a category prioritized?</h2>
           <p>Tell us what you're shopping for next and we'll bump it up the queue.</p>
           <form class="wl" data-waitlist="reviews"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Request &amp; notify me</button></form>
-          <div class="wl-note">Front-end demo · stored locally in your browser only.</div>
+          <div class="wl-note">We'll only use your email to notify you — no spam, unsubscribe anytime.</div>
         </div>
       </div></section>`;
   }
@@ -792,7 +792,7 @@
         <h2 style="margin-top:12px">"Best gaming mouse under $100." Done right.</h2>
         <p>No affiliate-bait listicles. Each guide will pull straight from our cross-referenced rankings, sorted by budget and use-case. Want first access?</p>
         <form class="wl" data-waitlist="guides"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Get first access</button></form>
-        <div class="wl-note">Front-end demo · stored locally in your browser only.</div>
+        <div class="wl-note">We'll only use your email to notify you — no spam, unsubscribe anytime.</div>
       </div>
       <div class="pillars" style="margin-top:28px">
         <div class="pillar rv"><div class="pn">Planned</div><h3 style="margin-top:14px">Best budget picks</h3><p>The strongest gear at every price ceiling, from $50 to flagship.</p></div>
@@ -848,7 +848,7 @@
         <h2 style="margin-top:14px">${esc(c.name)} ranking in progress</h2>
         <p>${esc(c.blurb)}</p>
         <form class="wl" data-waitlist="cat-${c.slug}"><input type="email" placeholder="you@example.com" aria-label="Email" required><button class="btn btn-primary" type="submit">Notify me</button></form>
-        <div class="wl-note">Front-end demo · stored locally in your browser only.</div>
+        <div class="wl-note">We'll only use your email to notify you — no spam, unsubscribe anytime.</div>
       </div>
       <div style="text-align:center;margin-top:26px"><a class="link-arrow" href="#/reviews" data-route="/reviews">← Back to all categories</a></div>
       </div></section>`;
@@ -958,14 +958,32 @@
     draw();
   }
 
-  /* ---------- waitlist ---------- */
+ /* ---------- waitlist ---------- */
+  const WAITLIST_ENDPOINT = "https://formspree.io/f/xnjkkeae";
   function wireWaitlist(form){
     form.addEventListener("submit",(e)=>{
       e.preventDefault();
       const input=form.querySelector("input"); const val=(input.value||"").trim();
       if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val)){ input.style.borderColor="var(--amber)"; input.focus(); return; }
-      try{ const arr=JSON.parse(localStorage.getItem("rr_waitlist")||"[]"); arr.push({email:val,at:Date.now(),src:form.dataset.waitlist}); localStorage.setItem("rr_waitlist",JSON.stringify(arr)); }catch(err){}
-      form.outerHTML = `<div class="wl-ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> You're on the list — we'll be in touch.</div>`;
+      const btn = form.querySelector("button");
+      const originalText = btn.textContent;
+      btn.disabled = true; btn.textContent = "Sending...";
+      const fd = new FormData();
+      fd.append("email", val);
+      fd.append("source", form.dataset.waitlist || "unknown");
+      fetch(WAITLIST_ENDPOINT, { method: "POST", headers: { "Accept": "application/json" }, body: fd })
+        .then(res => {
+          if(res.ok){
+            form.outerHTML = `<div class="wl-ok"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> You're on the list — we'll be in touch.</div>`;
+          } else {
+            btn.disabled = false; btn.textContent = originalText;
+            input.style.borderColor = "var(--amber)";
+          }
+        })
+        .catch(() => {
+          btn.disabled = false; btn.textContent = originalText;
+          input.style.borderColor = "var(--amber)";
+        });
     });
   }
 
