@@ -1264,11 +1264,12 @@ const headsets = [
     const blips = [
       {a:35, r:.58, live:true, label:"MICE"},
       {a:128, r:.70, live:true, label:"KEYBOARDS"},
-      {a:205, r:.5, live:false, label:"HEADSETS"},
-      {a:288, r:.74, live:false, label:"MONITORS"},
-      {a:158, r:.86, live:false, label:"CHAIRS"},
-      {a:322, r:.4, live:false, label:"PADS"}
+      {a:205, r:.5, live:true, label:"HEADSETS"},
+      {a:288, r:.74, live:true, label:"MONITORS"},
+      {a:158, r:.86, live:true, label:"CHAIRS"},
+      {a:322, r:.4, live:true, label:"PADS"}
     ].map(b=>({...b, glow:0}));
+    
     let sweep=0;
     function toRad(d){ return d*Math.PI/180; }
     function frame(){
