@@ -1256,7 +1256,7 @@ const headsets = [
     const canvas=document.getElementById("radar"); if(!canvas) return;
     const ctx=canvas.getContext("2d");
     const dpr=Math.min(2, window.devicePixelRatio||1);
-    function size(){ const r=canvas.getBoundingClientRect(); canvas.width=r.width*dpr; canvas.height=r.height*dpr; }
+    function size(){ const r=canvas.getBoundingClientRect(); if(r.width>0 && r.height>0){ canvas.width=r.width*dpr; canvas.height=r.height*dpr; } else { requestAnimationFrame(size); } }
     size();
     const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const phos = cssVar("--phosphor") || "#35f0a5";
